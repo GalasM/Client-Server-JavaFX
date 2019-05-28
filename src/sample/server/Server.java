@@ -1,6 +1,5 @@
 package sample.server;
 
-import sample.client.Listener;
 import sample.messages.Message;
 import sample.messages.MessageType;
 
@@ -10,16 +9,84 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Server {
+public class Server implements Runnable{
 
     private static final int PORT = 2004;
+    private ServerSocket socket;
     private static String[][] hasla = {{"Ala ma", "Powiedzenia"}, {"Krol Karol kupil krolowej Karolinie korale koloru koralowego", "aaa"}, {"Stol z powylamywanymi nogami", "bbb"}};
     private static final int generatedNumber = randomValue();
     private static String password;
     private static StringBuilder passwordCompleted = new StringBuilder();
     private static String category;
     private static int length;
-    private static ArrayList<Handler> players ;
+    private static int playersCount;
+    private static int startedPlayers=0;
+    private ArrayList<Socket> clients;
+    private ArrayList<Thread> clientThreads;
+    private static ArrayList<Handler> players;
+
+    //CONSTRUCTOR
+    public Server() throws IOException {
+        players = new ArrayList<>();
+        clients = new ArrayList<>();
+        socket = new ServerSocket(PORT);
+    }
+
+    //RUN
+    @Override
+    public void run()
+    {
+        clientThreads = new ArrayList<>();
+        while(true){
+            try {
+                final Socket clientSocket = socket.accept();
+                clients.add(clientSocket);
+                Handler clientThred = new Handler(clientSocket,this);
+                players.add(clientThred);
+                Thread x = new Thread(clientThred);
+                clientThreads.add(x);
+                playersCount++;
+                x.start();
+
+            System.out.println("ilosc graczy:"+playersCount);
+            if(playersCount==0){
+
+                try {
+                    System.out.println("zamykam");
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+            } catch (IOException ex){
+                ex.printStackTrace();
+            }
+        }
+    }
+
+
+    public void writeToAllSockets(Message input) {
+        for (Handler clientThread : players) {
+            clientThread.sendMessage(input);
+        }
+    }
+
+    public void showAllSockets() {
+        for (Handler clientThread : players) {
+          System.out.println(clientThread+" ilosc graczy:"+playersCount);
+        }
+    }
+
+    public void dissconnectClient(Handler client)
+    {
+        System.out.println(client.getThread());
+        clients.remove(client.getSocket());
+        clientThreads.remove(client.getThread());
+        players.remove(client);
+        playersCount--;
+        showAllSockets();
+    }
 
     private static int randomValue() {
         Random generator = new Random();
@@ -40,7 +107,7 @@ public class Server {
         passwordCompleted.setCharAt(i, ClickedSign);
     }
 
-   static void checkSign(String sign) {
+   static int checkSign(String sign) {
         int countSigns=0;
         for (int i = 0; i < length; i++) {
             char ClickedSign;
@@ -51,6 +118,7 @@ public class Server {
                 setHiddenWord(i, ClickedSign);
             }
         }
+        return countSigns;
     }
 
     private static void hideWord() {
@@ -64,18 +132,37 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
-        ServerSocket listener = new ServerSocket(PORT);
+        Server server = new Server();
+        server.run();
+        // ServerSocket listener = new ServerSocket(PORT);
 
-        try {
+       /* try {
             players = new ArrayList<>();
             int i =0;
             while (!listener.isClosed()) {
               // Handler connection = new Handler(listener.accept()).start();
                     System.out.println("Uruchomiono serwer");
-                    Handler connection = new Handler(listener.accept());
+                    Handler connection = new Handler(listener.accept(),this);
                     players.add(connection);
                     players.get(i).start();
-                    i++;
+
+                    if(i>0) {
+                        Thread.sleep(3000);
+                        Message StartWord = new Message();
+                        Message StartCategory = new Message();
+
+                        StartWord.setType(MessageType.PASSWORD);
+                        password = randomWord();
+                        hideWord();
+                        StartWord.setMsg(password);
+                        System.out.println(StartWord.getMsg());
+                        category = randomCategory();
+                        StartCategory.setMsg(category);
+                        StartCategory.setType(MessageType.CATEGORY);
+                        players.get(0).sendMessage(StartWord);
+                        players.get(0).sendMessage(StartCategory);
+                    }
+                i++;
                     if (!connection.getActive()) {
                         listener.close();
                     }
@@ -85,32 +172,39 @@ public class Server {
             e.printStackTrace();
         } finally {
             listener.close();
-        }
+        }*/
 
     }
 
-    private static class Handler extends Thread {
+    private class Handler implements Runnable {
 
         private Socket socket;
+        private Server baseServer;
         private ObjectInputStream in;
         private OutputStream os;
         private ObjectOutputStream out;
         private InputStream is;
         private boolean active=true;
 
-        Handler(Socket socket)
+        Handler(Socket socket, Server baseServer)
         {
+            this.baseServer=baseServer;
             this.socket=socket;
+            try {
+                is = socket.getInputStream();
+                in = new ObjectInputStream(is);
+                os = socket.getOutputStream();
+                out = new ObjectOutputStream(os);
+            } catch (IOException ex){
+                ex.printStackTrace();
+            }
         }
 
         @Override
         public void run() {
             try {
+
                 System.out.println("Uruchomiono Handler");
-                is = socket.getInputStream();
-                in = new ObjectInputStream(is);
-                os = socket.getOutputStream();
-                out = new ObjectOutputStream(os);
 
             Message firstMessage = (Message) in.readObject();
             firstMessage.setMsg("Pierwsza wiadomosc");
@@ -122,15 +216,21 @@ public class Server {
                 System.out.println("Nie odebrano wiadomosci!");
             }
             try {
+
             while(active) {
 
                     Message inputmsg = (Message) in.readObject();
+                    System.out.println(inputmsg.getMsg());
+                  //  baseServer.writeToAllSockets(inputmsg);
                     if (inputmsg != null) {
                         switch (inputmsg.getType()) {
                             case START:
+                                    startedPlayers++;
                                     Message StartWord = new Message();
                                     Message StartCategory = new Message();
-
+                                    Message Start = new Message();
+                                    Start.setType(MessageType.START);
+                                    Start.setMsg("Start");
                                     StartWord.setType(MessageType.PASSWORD);
                                     password = randomWord();
                                     hideWord();
@@ -139,25 +239,50 @@ public class Server {
                                     category = randomCategory();
                                     StartCategory.setMsg(category);
                                     StartCategory.setType(MessageType.CATEGORY);
-                                    sendMessage(StartWord);
-                                    sendMessage(StartCategory);
+                                    System.out.println("startedPlayers:"+startedPlayers+" playerscount:"+playersCount);
+                                    if(startedPlayers==playersCount) {
+                                        baseServer.writeToAllSockets(Start);
+                                        baseServer.writeToAllSockets(StartWord);
+                                        baseServer.writeToAllSockets(StartCategory);
+                                    }
+                                    else{
+                                        Message info = new Message();
+                                        info.setType(MessageType.INFO);
+                                        sendMessage(info);
+                                    }
+
                                     break;
 
                             case SIGN:
-                                    System.out.println(inputmsg.getMsg());
-                                    checkSign(inputmsg.getMsg());
-                                    String msg = new String(passwordCompleted);
-                                    System.out.println(passwordCompleted);
                                     Message Pass = new Message();
+                                    Message counter = new Message();
+                                    int count = checkSign(inputmsg.getMsg());
+                                    counter.setCountSign(count);
+                                    counter.setType(MessageType.SIGN);
+                                    String msg = new String(passwordCompleted);
                                     Pass.setMsg(msg);
-                                    Pass.setType(MessageType.SIGN);
-                                    sendMessage(Pass);
+                                    Pass.setType(MessageType.INCOMPLETEPASSWORD);
+                                    if(inputmsg.getSign()!=null)
+                                    Pass.setSign(inputmsg.getSign());
+                                    baseServer.writeToAllSockets(Pass);
+                                    sendMessage(counter);
                                     break;
 
                             case EXIT:
-                                    active=false;
-                                    closeConnection();
+                                baseServer.dissconnectClient(this);
+                                playersCount--;
+                                startedPlayers--;
+                                //System.out.println("ilosc graczy:"+playersCount);
+                                if(playersCount==0) {
+                                    active = false;
+
+                                }
+                                closeConnection();
                                     break;
+
+                            case NOTIFICATION:
+                                System.out.println(inputmsg.getMsg());
+                                break;
                         }
                     }
 
@@ -166,14 +291,14 @@ public class Server {
                 closeConnection();
                 System.out.println("Blad przy odczytaniu wiadomosci przez serwer. "+Thread.currentThread());
 
-            } catch (IOException e) {
+            }  catch (IOException e) {
                 closeConnection();
                 System.out.println("Blad przy odczytaniu wiadomosci przez serwer."+Thread.currentThread());
-            }
-            finally {
+            } finally {
 
                 closeConnection();
             }
+
         }
 
         private Message sendNotification(Message firstMessage) throws IOException {
@@ -184,7 +309,7 @@ public class Server {
             return msg;
         }
 
-        void sendMessage(Message msg) {
+        public void sendMessage(Message msg) {
             try{
                 out.writeObject(msg);
                 out.flush();
@@ -208,6 +333,14 @@ public class Server {
             {
                 System.out.println("Nie udalo sie zamknac polaczenia!");
             }
+        }
+
+        public Socket getSocket(){
+            return this.socket;
+        }
+
+        public Thread getThread(){
+            return Thread.currentThread();
         }
     }
 }

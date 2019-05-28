@@ -23,12 +23,14 @@ import java.util.ResourceBundle;
 
 
 public class Controller  implements Initializable {
+    @FXML public Button a,ą,b,c,ć,d,e,ę,f,g,h,i,j,k,l,ł,m,n,ń,o,ó,p,r,s,ś,t,u,w,y,z,ż,ź;
     @FXML public FlowPane Gpane;
     @FXML public Button Buttonstart;
     @FXML public FlowPane Kategorie;
-    Thread x;
+    @FXML public GridPane keyboard;
+   // Thread x;
     private Listener listener;
-    private boolean clickedStart=true;
+    public boolean clickedStart=true;
 
     /**
      * Initializes the controller class.
@@ -49,9 +51,11 @@ public class Controller  implements Initializable {
                 }
 
        if(!name.equals(null)) {
+
            listener = new Listener("localhost", 2004, name, this);
-           x = new Thread(listener);
+           Thread x = new Thread(listener);
            x.start();
+
        }
     }
 
@@ -60,6 +64,7 @@ public class Controller  implements Initializable {
         Message msg = new Message();
         msg.setType(MessageType.SIGN);
         Button x = (Button) e.getSource();
+        msg.setSign(x);
         x.setDisable(true);
         String ClickedSignStr;
         ClickedSignStr = (x.getId()).toUpperCase();
@@ -91,7 +96,7 @@ public class Controller  implements Initializable {
             }
 
             clickedStart=false;
-            Buttonstart.setText("LOSUJ");
+           // Buttonstart.setText("LOSUJ");
         }
         else {
             //TODO LOSOWANIE KWOT
@@ -100,6 +105,15 @@ public class Controller  implements Initializable {
 
     @FXML
     public void exit() {
+        Message msg = new Message();
+        msg.setType(MessageType.EXIT);
+        msg.setMsg("EXIT");
+        try {
+            listener.sendMessage(msg);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         listener.exit();
         Platform.runLater(new Runnable() {
             @Override
@@ -114,6 +128,7 @@ public class Controller  implements Initializable {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                Gpane.getChildren().clear();
                 Gpane.setAlignment(Pos.CENTER);
                 Gpane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(2))));
                 Kategorie.setAlignment(Pos.CENTER);
@@ -137,12 +152,42 @@ public class Controller  implements Initializable {
             public void run() {
                 for (int i = 0; i < listener.getWordLength(); i++) {
                     char x = listener.getHidden().charAt(i);
-                    String y = Character.toString(x);
+                    String clickedSign = Character.toString(x);
                     if(listener.getHidden().charAt(i)!='#' && listener.getHidden().charAt(i)!='_') {
-                        listener.labels.get(i).setText(y);
+                        listener.labels.get(i).setText(clickedSign);
                     }
                 }
             }
         });
     }
+
+    public void setInfo(){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Text x = new Text("Oczekiwanie na innych graczy!");
+                Gpane.getChildren().add(x);
+            }
+        });
+    }
+
+    public void disableButton(Button x)
+    {
+        System.out.println("disable button:"+x.getId());
+        x.setDisable(true);
+    }
+
+    public void setClickedStart(boolean clickedStart) {
+        this.clickedStart = clickedStart;
+    }
+
+    public boolean getClickedStart(){
+        return this.clickedStart;
+    }
+
+    public void setButtonStart()
+    {
+        Buttonstart.setText("LOSUJ");
+    }
+
 }

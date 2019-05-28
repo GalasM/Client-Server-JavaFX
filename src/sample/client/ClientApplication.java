@@ -3,10 +3,13 @@ package sample.client;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import javafx.event.ActionEvent;
 
 public class ClientApplication extends Application {
 

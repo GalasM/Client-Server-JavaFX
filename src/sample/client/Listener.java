@@ -1,6 +1,7 @@
 package sample.client;
 
 
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.FlowPane;
 import sample.messages.Message;
@@ -28,6 +29,7 @@ public class Listener implements Runnable{
     private StringBuilder hiddenWord;
     private int wordLength;
     private int wordsCounter;
+    private boolean started= true;
     List<Field> labels = new ArrayList<>();
     List<FlowPane> words = new ArrayList<>();
 
@@ -73,18 +75,41 @@ public class Listener implements Runnable{
 
                                 case CATEGORY:
                                    // System.out.println(message.getMsg());
-                                    this.category = message.getMsg();
-                                    this.controller.createBoard();
+                                        this.category = message.getMsg();
+                                        this.controller.createBoard();
+
                                     break;
 
                                 case SIGN:
-                                    hiddenWord= new StringBuilder(message.getMsg());
-                                    System.out.println(hiddenWord);
-                                    this.controller.changeBoard();
+                                    System.out.println("ilosc trafien:"+message.getCountSign());
+                                    //zrobic disable przycisku litery
                                     break;
 
                                 case NOTIFICATION:
                                     System.out.println(message.getMsg());
+
+                                case START:
+
+                                        controller.setClickedStart(false);
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                controller.setButtonStart();
+                                            }
+                                        });
+
+                                    break;
+
+                                case INCOMPLETEPASSWORD:
+                                    hiddenWord= new StringBuilder(message.getMsg());
+                                    System.out.println(hiddenWord);
+                                    this.controller.changeBoard();
+                                    if(message.getSign()!=null)
+                                    this.controller.disableButton(message.getSign());
+                                    break;
+
+                                case INFO:
+                                    controller.setInfo();
                             }
                         }
                     }
@@ -154,10 +179,10 @@ public class Listener implements Runnable{
 
     public void exit() {
         try {
-            Message exit = new Message();
+           /* Message exit = new Message();
             exit.setType(MessageType.EXIT);
             exit.setMsg("exit");
-            sendMessage(exit);
+            sendMessage(exit);*/
             in.close();
             out.close();
             socket.close();
