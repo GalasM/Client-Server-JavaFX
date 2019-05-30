@@ -24,12 +24,13 @@ public class Listener implements Runnable{
     private ObjectInputStream in;
     private OutputStream os;
 
-    private String password;
     private String category;
     private StringBuilder hiddenWord;
     private int wordLength;
     private int wordsCounter;
-    private boolean started= true;
+    private boolean yourTurn= false;
+    private int win;
+    private int sum;
     List<Field> labels = new ArrayList<>();
     List<FlowPane> words = new ArrayList<>();
 
@@ -56,69 +57,65 @@ public class Listener implements Runnable{
             firstMessage.setType(MessageType.NOTIFICATION);
             sendMessage(firstMessage);
 
-            while (socket.isConnected()) {
-                try {
-                    Message message = null;
-                    message = (Message) in.readObject();
-                  //  System.out.println(message.getMsg());
 
                     while(socket.isConnected()) {
+                        Message message = null;
                         message = (Message) in.readObject();
                         if (message != null) {
 
                             switch (message.getType()) {
                                 case PASSWORD:
-                                   // System.out.println(message.getMsg());
-                                    this.password = message.getMsg();
-                                    wordLength=password.length();
+                                    this.hiddenWord = new StringBuilder(message.getMsg());
+                                    wordLength=hiddenWord.length();
                                     break;
 
                                 case CATEGORY:
-                                   // System.out.println(message.getMsg());
                                         this.category = message.getMsg();
                                         this.controller.createBoard();
 
                                     break;
 
                                 case SIGN:
-                                    System.out.println("ilosc trafien:"+message.getCountSign());
+                                    System.out.println(message.getName()+">ilosc trafien:"+message.getCountSign());
+                                    setSum(win*message.getCountSign());
+                                    controller.setCash(Integer.toString(sum));
                                     //zrobic disable przycisku litery
                                     break;
 
                                 case NOTIFICATION:
-                                    System.out.println(message.getMsg());
-
+                                    System.out.println(message.getName()+">"+message.getMsg());
+                                    break;
                                 case START:
 
                                         controller.setClickedStart(false);
-                                        Platform.runLater(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                controller.setButtonStart();
-                                            }
-                                        });
-
                                     break;
 
                                 case INCOMPLETEPASSWORD:
                                     hiddenWord= new StringBuilder(message.getMsg());
-                                    System.out.println(hiddenWord);
+                                    System.out.println(message.getName()+">"+hiddenWord);
                                     this.controller.changeBoard();
-                                    if(message.getSign()!=null)
-                                    this.controller.disableButton(message.getSign());
                                     break;
 
                                 case INFO:
-                                    controller.setInfo();
+                                    controller.setInfo(message.getMsg());
+                                    break;
+
+                                case TURN:
+                                    setYourTurn(message.isTurn());
+                                    controller.sequencing(yourTurn);
+                                    break;
+
+                                case RANDOM:
+                                    controller.setCash(message.getMsg());
+                                    break;
+
                             }
                         }
                     }
                 } catch (ClassNotFoundException e) {
                     System.out.println("Blad przy odbiorze wiadomosci!");
                 }
-
-            }
-        } catch (IOException e) {
+         catch (IOException e) {
             System.out.println("Nie mozna polaczyc sie z serwerem!");
         }
 
@@ -126,10 +123,8 @@ public class Listener implements Runnable{
 
     public void sendMessage(Message msg) throws IOException{
         try{
-            Message newMessage = new Message();
-            newMessage.setType(msg.getType());
-            newMessage.setMsg(msg.getMsg());
-            out.writeObject(newMessage);
+
+            out.writeObject(msg);
             out.flush();
         }
         catch(IOException ioException){
@@ -137,15 +132,6 @@ public class Listener implements Runnable{
         }
     }
 
-    private void hideWord(String password) {
-        hiddenWord = new StringBuilder(password);
-        for (int i = 0; i < wordLength; i++)
-            if (password.charAt(i) == ' ')
-                hiddenWord.setCharAt(i, '_');
-            else
-                hiddenWord.setCharAt(i, '#');
-
-    }
 
     private void addLabels() {
         words.add(new FlowPane(Orientation.VERTICAL,2,2));
@@ -167,7 +153,6 @@ public class Listener implements Runnable{
     }
 
     public void setPanels() {
-        hideWord(password);
         addLabels();
         for (int i = 0; i < wordLength; i++) {
             String ClickedSign = String.valueOf(hiddenWord.charAt(i));
@@ -179,10 +164,6 @@ public class Listener implements Runnable{
 
     public void exit() {
         try {
-           /* Message exit = new Message();
-            exit.setType(MessageType.EXIT);
-            exit.setMsg("exit");
-            sendMessage(exit);*/
             in.close();
             out.close();
             socket.close();
@@ -197,9 +178,6 @@ public class Listener implements Runnable{
         return wordLength;
     }
 
-    public String getPassword() {
-        return password;
-    }
 
     public String getHidden() {
         return hiddenWord.toString();
@@ -211,5 +189,19 @@ public class Listener implements Runnable{
 
     public String getCategory() {
         return category;
+    }
+
+    public String getName() { return name; }
+
+    public void setYourTurn(boolean yourTurn) { this.yourTurn = yourTurn; }
+
+    public boolean isYourTurn() { return yourTurn; }
+
+    public void setWin(int win) { this.win = win; }
+
+    public int getWin() { return win; }
+
+    public void setSum(int sum) {
+        this.sum = sum;
     }
 }

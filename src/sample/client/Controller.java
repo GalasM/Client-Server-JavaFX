@@ -27,7 +27,9 @@ public class Controller  implements Initializable {
     @FXML public FlowPane Gpane;
     @FXML public Button Buttonstart;
     @FXML public FlowPane Kategorie;
+    @FXML public FlowPane Cash;
     @FXML public GridPane keyboard;
+    @FXML public AnchorPane pan;
    // Thread x;
     private Listener listener;
     public boolean clickedStart=true;
@@ -64,11 +66,16 @@ public class Controller  implements Initializable {
         Message msg = new Message();
         msg.setType(MessageType.SIGN);
         Button x = (Button) e.getSource();
-        msg.setSign(x);
         x.setDisable(true);
         String ClickedSignStr;
         ClickedSignStr = (x.getId()).toUpperCase();
         msg.setMsg(ClickedSignStr);
+        msg.setName(listener.getName());
+
+        Message turn = new Message();
+        turn.setName(listener.getName());
+        turn.setTurn(false);
+
 
         try {
             listener.sendMessage(msg);
@@ -80,25 +87,27 @@ public class Controller  implements Initializable {
 
     @FXML
     public void starting(Event e) {
-
-
-
+        Message msg = new Message();
         if(clickedStart) {
-            Message msg = new Message();
             msg.setType(MessageType.START);
             msg.setMsg("START");
+            msg.setName(listener.getName());
             try {
                 listener.sendMessage(msg);
 
             } catch (IOException ex) {
                 ex.printStackTrace();
-
             }
-
             clickedStart=false;
-           // Buttonstart.setText("LOSUJ");
         }
         else {
+            msg.setType(MessageType.RANDOM);
+            try {
+                listener.sendMessage(msg);
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             //TODO LOSOWANIE KWOT
         }
     }
@@ -108,6 +117,7 @@ public class Controller  implements Initializable {
         Message msg = new Message();
         msg.setType(MessageType.EXIT);
         msg.setMsg("EXIT");
+        msg.setName(listener.getName());
         try {
             listener.sendMessage(msg);
 
@@ -161,33 +171,65 @@ public class Controller  implements Initializable {
         });
     }
 
-    public void setInfo(){
+    public void setInfo(String info){
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                Text x = new Text("Oczekiwanie na innych graczy!");
+                Text x = new Text(info);
                 Gpane.getChildren().add(x);
             }
         });
     }
 
-    public void disableButton(Button x)
+    public void sequencing(boolean turn)
     {
-        System.out.println("disable button:"+x.getId());
-        x.setDisable(true);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if(!turn) {
+                    Text info = new Text("Nie twoja tura");
+                    Cash.getChildren().add(info);
+                    setButtonStart(true);  //jesli nie jest twoja runda wysylasz true zeby wylaczyc przycisk
+                }
+                else {
+                    Text info = new Text("Twoja tura");
+                    Cash.getChildren().add(info);
+                    setButtonStart(false);//jesli jest twoja runda
+                }
+            }
+        });
     }
 
-    public void setClickedStart(boolean clickedStart) {
-        this.clickedStart = clickedStart;
+    public void setCash(String cash){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if(cash.equals("BANKRUT"))
+                    listener.setWin(0);
+                else {
+                    listener.setWin(Integer.parseInt(cash));
+                    setButtonStart(true);
+                    setKeyBoard(true);
+                }
+                Text textCash = new Text("Wylosowano: "+cash);
+                Cash.getChildren().clear();
+                Cash.getChildren().add(textCash);
+
+            }
+        });
     }
 
-    public boolean getClickedStart(){
-        return this.clickedStart;
-    }
-
-    public void setButtonStart()
+    public void setButtonStart(boolean x)
     {
+        Buttonstart.setDisable(x);
         Buttonstart.setText("LOSUJ");
     }
+
+    public void setKeyBoard(boolean x){
+
+                keyboard.setVisible(x);
+    }
+
+    public void setClickedStart(boolean clickedStart) { this.clickedStart = clickedStart;}
 
 }

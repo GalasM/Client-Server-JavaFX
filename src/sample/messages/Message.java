@@ -1,23 +1,15 @@
 package sample.messages;
 
 
-import javafx.scene.control.Button;
-
 import java.io.Serializable;
 
 public class Message implements Serializable {
     MessageType type;
     String msg;
-    Button sign = null;
     int countSign;
+    String name;
+    boolean Turn;
 
-    public void setSign(Button sign) {
-        this.sign = sign;
-    }
-
-    public Button getSign() {
-        return sign;
-    }
 
     public void setMsg(String msg) {
         this.msg = msg;
@@ -42,4 +34,12 @@ public class Message implements Serializable {
     public int getCountSign() {
         return countSign;
     }
+
+    public void setName(String name) { this.name = name; }
+
+    public String getName() { return name; }
+
+    public void setTurn(boolean turn) { Turn = turn; }
+
+    public boolean isTurn() { return Turn; }
 }

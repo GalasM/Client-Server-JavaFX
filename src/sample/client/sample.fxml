@@ -10,7 +10,7 @@
 <AnchorPane fx:id="pan" prefHeight="800.0" prefWidth="1200.0" xmlns:fx="http://javafx.com/fxml/1" style="-fx-background-color: #ffef76;" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="sample.client.Controller">
     <FlowPane fx:id="Kategorie" minWidth = "700" layoutX = "450" layoutY = "10" hgap = "50" vgap = "7" ></FlowPane>
     <FlowPane fx:id="Gpane" hgap="50" layoutX="450" layoutY="70" minWidth="700" vgap="7" />
-    <GridPane fx:id="keyboard" layoutX="14.0" layoutY="402.0" maxWidth="707.0" prefHeight="183.0" prefWidth="386.0">
+    <GridPane fx:id="keyboard" layoutX="14.0" layoutY="402.0" maxWidth="707.0" prefHeight="183.0" prefWidth="386.0" visible="false">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="10.0" />
@@ -62,4 +62,5 @@
     </GridPane>
     <Button fx:id="Buttonstart" layoutX="50" layoutY="50" mnemonicParsing="false" onAction="#starting" prefHeight="30.0" prefWidth="100.0" text="START" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
     <Button fx:id="Buttonwyjscie" layoutX="50" layoutY="700" mnemonicParsing="false" onAction="#exit" prefHeight="30.0" prefWidth="100.0" text="WYJSCIE" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+    <FlowPane fx:id="Cash" layoutY="650" layoutX="650"></FlowPane>
 </AnchorPane>

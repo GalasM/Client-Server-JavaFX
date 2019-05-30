@@ -13,7 +13,10 @@ public class Server implements Runnable{
 
     private static final int PORT = 2004;
     private ServerSocket socket;
-    private static String[][] hasla = {{"Ala ma", "Powiedzenia"}, {"Krol Karol kupil krolowej Karolinie korale koloru koralowego", "aaa"}, {"Stol z powylamywanymi nogami", "bbb"}};
+    private static String[][] hasla = {{"Lew czarownika i stara szafa","Literatura"},{"Ala ma", "Powiedzenia"}, {"Krol Karol kupil krolowej Karolinie korale koloru koralowego", "aaa"}, {"Stol z powylamywanymi nogami", "bbb"}};
+    private static final int haslaCount=4;
+    private static String[] kwoty ={"500","1000","1500","2000","BANKRUT"};
+    private static final int kwotyCount=5;
     private static final int generatedNumber = randomValue();
     private static String password;
     private static StringBuilder passwordCompleted = new StringBuilder();
@@ -21,6 +24,8 @@ public class Server implements Runnable{
     private static int length;
     private static int playersCount;
     private static int startedPlayers=0;
+    private boolean started = false;
+    private boolean activeServer = true;
     private ArrayList<Socket> clients;
     private ArrayList<Thread> clientThreads;
     private static ArrayList<Handler> players;
@@ -37,31 +42,25 @@ public class Server implements Runnable{
     public void run()
     {
         clientThreads = new ArrayList<>();
-        while(true){
+        while(activeServer){
             try {
-                final Socket clientSocket = socket.accept();
-                clients.add(clientSocket);
-                Handler clientThred = new Handler(clientSocket,this);
-                players.add(clientThred);
-                Thread x = new Thread(clientThred);
-                clientThreads.add(x);
-                playersCount++;
-                x.start();
+                if (!socket.isClosed()) {
+                    final Socket clientSocket = socket.accept();
+                    clients.add(clientSocket);
+                    Handler clientThred = new Handler(clientSocket, this);
+                    players.add(clientThred);
+                    Thread x = new Thread(clientThred);
+                    clientThreads.add(x);
+                    playersCount++;
+                    x.start();
 
-            System.out.println("ilosc graczy:"+playersCount);
-            if(playersCount==0){
+                    System.out.println("ilosc graczy:" + playersCount);
 
-                try {
-                    System.out.println("zamykam");
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-                break;
-            }
-            } catch (IOException ex){
-                ex.printStackTrace();
-            }
+                } catch(IOException ex){
+                   System.out.println("Zamknieto socket i wylaczono serwer!");
+                }
+
         }
     }
 
@@ -78,7 +77,7 @@ public class Server implements Runnable{
         }
     }
 
-    public void dissconnectClient(Handler client)
+    public void disconnectClient(Handler client)
     {
         System.out.println(client.getThread());
         clients.remove(client.getSocket());
@@ -90,7 +89,12 @@ public class Server implements Runnable{
 
     private static int randomValue() {
         Random generator = new Random();
-        return generator.nextInt(3);   //ilosc hasel i kategorii
+        return generator.nextInt(haslaCount);   //ilosc hasel i kategorii
+    }
+
+    private static String randomCash(){
+        Random rand = new Random();
+       return  kwoty[rand.nextInt(kwotyCount)];
     }
 
    static String randomWord()
@@ -131,51 +135,37 @@ public class Server implements Runnable{
                 passwordCompleted.setCharAt(i, '#');
     }
 
+    public void setActiveServer(boolean activeServer) {
+        this.activeServer = activeServer;
+    }
+
+    public void setTurns(){
+        boolean randTurn=true;
+        Message msg = new Message();
+        msg.setType(MessageType.TURN);
+        for (Handler clientThread : players) {
+
+            if(randTurn) {
+                clientThread.setYourTurn(randTurn);
+                msg.setTurn(randTurn);
+                clientThread.sendMessage(msg);
+                randTurn = false;
+            }
+            else {
+                clientThread.setYourTurn(randTurn);
+                msg.setTurn(randTurn);
+                clientThread.sendMessage(msg);
+            }
+        }
+    }
+
+    ///////MAIN///////////
     public static void main(String[] args) throws Exception {
         Server server = new Server();
         server.run();
-        // ServerSocket listener = new ServerSocket(PORT);
-
-       /* try {
-            players = new ArrayList<>();
-            int i =0;
-            while (!listener.isClosed()) {
-              // Handler connection = new Handler(listener.accept()).start();
-                    System.out.println("Uruchomiono serwer");
-                    Handler connection = new Handler(listener.accept(),this);
-                    players.add(connection);
-                    players.get(i).start();
-
-                    if(i>0) {
-                        Thread.sleep(3000);
-                        Message StartWord = new Message();
-                        Message StartCategory = new Message();
-
-                        StartWord.setType(MessageType.PASSWORD);
-                        password = randomWord();
-                        hideWord();
-                        StartWord.setMsg(password);
-                        System.out.println(StartWord.getMsg());
-                        category = randomCategory();
-                        StartCategory.setMsg(category);
-                        StartCategory.setType(MessageType.CATEGORY);
-                        players.get(0).sendMessage(StartWord);
-                        players.get(0).sendMessage(StartCategory);
-                    }
-                i++;
-                    if (!connection.getActive()) {
-                        listener.close();
-                    }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            listener.close();
-        }*/
 
     }
-
+    /////////////////////
     private class Handler implements Runnable {
 
         private Socket socket;
@@ -185,6 +175,7 @@ public class Server implements Runnable{
         private ObjectOutputStream out;
         private InputStream is;
         private boolean active=true;
+        private boolean yourTurn=false;
 
         Handler(Socket socket, Server baseServer)
         {
@@ -220,37 +211,48 @@ public class Server implements Runnable{
             while(active) {
 
                     Message inputmsg = (Message) in.readObject();
-                    System.out.println(inputmsg.getMsg());
-                  //  baseServer.writeToAllSockets(inputmsg);
+                    System.out.println(inputmsg.getName()+">"+inputmsg.getMsg());
+
                     if (inputmsg != null) {
                         switch (inputmsg.getType()) {
                             case START:
+                                if(started){
+                                    Message info = new Message();
+                                    info.setType(MessageType.INFO);
+                                    info.setMsg("Gra sie rozpoczela!");
+                                    sendMessage(info);
+                                }
+                                else {
                                     startedPlayers++;
                                     Message StartWord = new Message();
                                     Message StartCategory = new Message();
                                     Message Start = new Message();
                                     Start.setType(MessageType.START);
                                     Start.setMsg("Start");
+                                    Start.setName("Serwer");
                                     StartWord.setType(MessageType.PASSWORD);
+                                    StartWord.setName("Serwer");
                                     password = randomWord();
                                     hideWord();
-                                    StartWord.setMsg(password);
-                                    System.out.println(StartWord.getMsg());
+                                    String x = new String(passwordCompleted);
+                                    StartWord.setMsg(x);
                                     category = randomCategory();
                                     StartCategory.setMsg(category);
                                     StartCategory.setType(MessageType.CATEGORY);
-                                    System.out.println("startedPlayers:"+startedPlayers+" playerscount:"+playersCount);
-                                    if(startedPlayers==playersCount) {
+                                    StartCategory.setName("Serwer");
+                                    if (startedPlayers == playersCount) {
+                                        baseServer.setTurns();
                                         baseServer.writeToAllSockets(Start);
                                         baseServer.writeToAllSockets(StartWord);
                                         baseServer.writeToAllSockets(StartCategory);
-                                    }
-                                    else{
+                                        started = true;
+                                    } else {
                                         Message info = new Message();
                                         info.setType(MessageType.INFO);
+                                        info.setMsg("Oczekiwanie na innych graczy!");
                                         sendMessage(info);
                                     }
-
+                                }
                                     break;
 
                             case SIGN:
@@ -259,23 +261,31 @@ public class Server implements Runnable{
                                     int count = checkSign(inputmsg.getMsg());
                                     counter.setCountSign(count);
                                     counter.setType(MessageType.SIGN);
+                                    counter.setName("Serwer");
                                     String msg = new String(passwordCompleted);
                                     Pass.setMsg(msg);
                                     Pass.setType(MessageType.INCOMPLETEPASSWORD);
-                                    if(inputmsg.getSign()!=null)
-                                    Pass.setSign(inputmsg.getSign());
+                                    Pass.setName("Serwer");
                                     baseServer.writeToAllSockets(Pass);
                                     sendMessage(counter);
                                     break;
 
+                            case RANDOM:
+                                    Message rand = new Message();
+                                    rand.setType(MessageType.RANDOM);
+                                    rand.setMsg(randomCash());
+                                    rand.setTurn(true);
+                                    rand.setName("Serwer");
+                                    sendMessage(rand);
+                                    break;
+
                             case EXIT:
-                                baseServer.dissconnectClient(this);
-                                playersCount--;
+                                baseServer.disconnectClient(this);
                                 startedPlayers--;
-                                //System.out.println("ilosc graczy:"+playersCount);
                                 if(playersCount==0) {
                                     active = false;
-
+                                    baseServer.setActiveServer(false);
+                                    baseServer.socket.close();
                                 }
                                 closeConnection();
                                     break;
@@ -288,15 +298,15 @@ public class Server implements Runnable{
 
 
             }}catch (ClassNotFoundException e) {
-                closeConnection();
+               // closeConnection();
                 System.out.println("Blad przy odczytaniu wiadomosci przez serwer. "+Thread.currentThread());
 
             }  catch (IOException e) {
-                closeConnection();
+              //  closeConnection();
                 System.out.println("Blad przy odczytaniu wiadomosci przez serwer."+Thread.currentThread());
             } finally {
 
-                closeConnection();
+              //  closeConnection();
             }
 
         }
@@ -305,6 +315,7 @@ public class Server implements Runnable{
             Message msg = new Message();
             msg.setMsg("Klient polaczony z serwerem.");
             msg.setType(MessageType.NOTIFICATION);
+            msg.setName("Serwer");
             sendMessage(msg);
             return msg;
         }
@@ -319,10 +330,6 @@ public class Server implements Runnable{
             }
         }
 
-        public boolean getActive()
-        {
-            return this.active;
-        }
 
         void closeConnection() {
             try {
@@ -342,6 +349,10 @@ public class Server implements Runnable{
         public Thread getThread(){
             return Thread.currentThread();
         }
+
+        public void setYourTurn(boolean yourTurn) { this.yourTurn = yourTurn; }
+
+        public boolean getYourTurn(){ return yourTurn;}
     }
 }
 
