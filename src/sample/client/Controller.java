@@ -330,6 +330,22 @@ public class Controller  implements Initializable {
 
     }
 
+    void GameOver(Message msg)
+    {
+       Platform.runLater(() ->{
+           keyboard.setVisible(false);
+           Cash.setVisible(false);
+           Info.setVisible(false);
+           setButtonPassword(true);
+           setButtonStart(true);
+           Alert alert = new Alert(Alert.AlertType.INFORMATION);
+           alert.setTitle("Koniec gry");
+           alert.setHeaderText(null);
+           alert.setContentText(msg.getMsg());
+           alert.showAndWait();
+       });
+    }
+
     void setCash(String cash){
         Message newCurrent = new Message();
         newCurrent.setType(MessageType.CURRENTACCOUNT);

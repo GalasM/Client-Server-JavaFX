@@ -171,6 +171,10 @@ public class Listener implements Runnable{
                                 case CURRENTACCOUNT:
                                     controller.updateCurrentAcount(message);
                                     break;
+
+                                case END:
+                                    controller.GameOver(message);
+                                    break;
                             }
                         }
                     }

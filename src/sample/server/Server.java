@@ -31,10 +31,11 @@ public class Server implements Runnable{
     private ArrayList<Socket> clients;
     private ArrayList<Thread> clientThreads;
     private static ArrayList<Handler> players;
-    private ArrayList<Integer> usedWords;
     private static int round = 1;
-    private static int account1;
-    private static int account2;
+    private static int account1=0;
+    private static int account2=0;
+    private static String name1;
+    private static String name2;
 
     //CONSTRUCTOR
     private Server() throws IOException {
@@ -189,17 +190,33 @@ public class Server implements Runnable{
 
     private void restartSerwer(){
 
+        if((round == 3 || round ==4) && account2!=account1){
+            Message end = new Message();
+            end.setName("Serwer");
+            end.setType(MessageType.END);
+            System.out.println("Koniec gry ");
+            if(account1>account2) {
+                System.out.println("Wygral gracz "+name1);
+                end.setMsg("Wygral gracz "+name1);
+            }
+            else if(account2>account1){
+                System.out.println("Wygral gracz "+name2);
+                end.setMsg("Wygral gracz "+name2);
+            }
 
-        if(generatedNumber==(haslaCount-1)) {
-            generatedNumber = 0;
+            writeToAllSockets(end);
         }
-        else
-            generatedNumber++;
-        started=false;
-        startedPlayers=0;
-        round++;
-        System.out.println("RUNDA "+round+"!");
-        System.out.println("account1: "+account1+" account2: "+account2);
+        else {
+            if (generatedNumber == (haslaCount - 1)) {
+                generatedNumber = 0;
+            } else
+                generatedNumber++;
+            started = false;
+            startedPlayers = 0;
+            round++;
+            System.out.println("RUNDA " + round + "!");
+            System.out.println("account1: " + account1 + " account2: " + account2);
+        }
     }
 
     ///////MAIN///////////
@@ -266,11 +283,12 @@ public class Server implements Runnable{
                                     sendMessage(info);
                                 }
                                 else {
-                                   /* Message Player = new Message();
-                                    Player.setMsg(inputmsg.getName());
-                                    Player.setType(MessageType.PLAYER);
-                                    Player.setCountSign(0);
-                                    writeToAllSockets(Player);*/
+                                    if(currentPlayer()==players.get(0)){
+                                        name1=inputmsg.getName();
+                                    }
+                                    else {
+                                        name2 = inputmsg.getName();
+                                    }
                                     startedPlayers++;
                                     Message StartWord = new Message();
                                     Message StartCategory = new Message();
