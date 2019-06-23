@@ -4,6 +4,8 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.*;
@@ -23,23 +25,23 @@ import java.util.ResourceBundle;
 
 
 public class Controller  implements Initializable {
-    @FXML public Button a,ą,b,c,ć,d,e,ę,f,g,h,i,j,k,l,ł,m,n,ń,o,ó,p,r,s,ś,t,u,w,y,z,ż,ź;
     @FXML public FlowPane Gpane;
     @FXML public Button Buttonstart;
+    @FXML public Button FindPassword;
     @FXML public FlowPane Kategorie;
     @FXML public FlowPane Cash;
+    @FXML public FlowPane Info;
+    @FXML public VBox playersPanel;
     @FXML public GridPane keyboard;
     @FXML public AnchorPane pan;
-   // Thread x;
+    @FXML public Text OverallAccount;
+    @FXML public Text CurrentAccont;
+    @FXML public Text OverallAccount1;
+    @FXML public Text CurrentAccont1;
     private Listener listener;
-    public boolean clickedStart=true;
+    private boolean clickedStart=true;
 
-    /**
-     * Initializes the controller class.
-     *
-     * @param url
-     * @param resourceBundle
-     */
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
                 String name = new String();
@@ -63,6 +65,7 @@ public class Controller  implements Initializable {
 
     @FXML
     public void clickSign(Event e) {
+        if(listener.isYourTurn()){
         Message msg = new Message();
         msg.setType(MessageType.SIGN);
         Button x = (Button) e.getSource();
@@ -76,7 +79,6 @@ public class Controller  implements Initializable {
         turn.setName(listener.getName());
         turn.setTurn(false);
 
-
         try {
             listener.sendMessage(msg);
         } catch (IOException ex) {
@@ -84,11 +86,26 @@ public class Controller  implements Initializable {
 
         }
     }
+        else{
+            //TODO ZMIANA GRACZA
+        }
+    }
 
     @FXML
     public void starting(Event e) {
         Message msg = new Message();
         if(clickedStart) {
+            Message msg1 = new Message();
+            msg1.setName(listener.getName());
+            msg1.setType(MessageType.PLAYER);
+            msg.setMsg(listener.getName());
+            try {
+                listener.sendMessage(msg1);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            FindPassword.setDisable(true);
+            FindPassword.setVisible(true);
             msg.setType(MessageType.START);
             msg.setMsg("START");
             msg.setName(listener.getName());
@@ -99,16 +116,43 @@ public class Controller  implements Initializable {
                 ex.printStackTrace();
             }
             clickedStart=false;
+
         }
         else {
             msg.setType(MessageType.RANDOM);
+            msg.setMsg("RANDOM");
+            msg.setName(listener.getName());
             try {
+                setButtonStart(true);
+                setKeyBoard(true);
+                setButtonPassword(false);
                 listener.sendMessage(msg);
 
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            //TODO LOSOWANIE KWOT
+        }
+    }
+
+    @FXML
+    public void find(){
+        String password = new String();
+        TextInputDialog dialog = new TextInputDialog("Podaj haslo");
+        dialog.setHeaderText(null);
+        dialog.setTitle("Zgadnij haslo!");
+        dialog.setContentText("Podaj haslo");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()){
+            password = result.get();
+        }
+        Message msg = new Message();
+        msg.setMsg(password.toUpperCase());
+        msg.setName(listener.getName());
+        msg.setType(MessageType.FIND);
+        try {
+            listener.sendMessage(msg);
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
     }
 
@@ -125,111 +169,239 @@ public class Controller  implements Initializable {
             ex.printStackTrace();
         }
         listener.exit();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Platform.exit();
-            }
-        });
+        Platform.runLater(() -> Platform.exit());
     }
 
-    public void createBoard() {
+    void createBoard() {
         listener.setPanels();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Gpane.getChildren().clear();
-                Gpane.setAlignment(Pos.CENTER);
-                Gpane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(2))));
-                Kategorie.setAlignment(Pos.CENTER);
+        Platform.runLater(() -> {
+            Gpane.getChildren().clear();
+            Gpane.setAlignment(Pos.CENTER);
+            Gpane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(2))));
+            Kategorie.setAlignment(Pos.CENTER);
 
-                Text kategory = new Text();
-                kategory.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR,20));
-                kategory.setText("Kategoria: " + listener.getCategory());
-                Kategorie.getChildren().add(kategory);
+            Kategorie.getChildren().clear();
+            Text kategory = new Text();
+            kategory.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR,20));
+            kategory.setText("Kategoria: " + listener.getCategory());
+            Kategorie.getChildren().add(kategory);
 
-                for (int i = 0; i < listener.getWordsCounter()+1; i++) {
-                    Gpane.getChildren().add(listener.words.get(i));
-                }
+            for (int i = 0; i < listener.getWordsCounter()+1; i++) {
+                Gpane.getChildren().add(listener.words.get(i));
             }
         });
-
     }
 
-    public void changeBoard() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < listener.getWordLength(); i++) {
-                    char x = listener.getHidden().charAt(i);
-                    String clickedSign = Character.toString(x);
-                    if(listener.getHidden().charAt(i)!='#' && listener.getHidden().charAt(i)!='_') {
-                        listener.labels.get(i).setText(clickedSign);
-                    }
+    void changeBoard() {
+        Platform.runLater(() -> {
+            for (int i = 0; i < listener.getWordLength(); i++) {
+                char x = listener.getHidden().charAt(i);
+                String clickedSign = Character.toString(x);
+                if(listener.getHidden().charAt(i)!='#' && listener.getHidden().charAt(i)!='_') {
+                    listener.labels.get(i).setText(clickedSign);
                 }
             }
         });
     }
 
-    public void setInfo(String info){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Text x = new Text(info);
-                Gpane.getChildren().add(x);
+    void updatePlayersPanel(Message x){
+        Platform.runLater(() -> {
+            String name = x.getMsg();
+            int account = x.getCountSign();
+                if(x.getName().equals(listener.getOppenentName())) {
+                    if (account == 0)
+                        OverallAccount1.setText(listener.getOppenentName() + " Ogólny stan konta: 0");
+                    else
+                        OverallAccount1.setText(listener.getOppenentName() + " Ogólny stan konta: "+account);
+                }
+                else if(x.getName().equals(listener.getName())){
+                    if(account==0)
+                        OverallAccount.setText(listener.getName() + " Ogólny stan konta: 0");
+                    else
+                        OverallAccount.setText(listener.getName() + " Ogólny stan konta: "+account);
+                }
+        });
+    }
+
+    void updatePlayerPanel(){
+        Platform.runLater(() -> {
+                    OverallAccount.setText(listener.getName()+ " Ogólny stan konta: 0");
+                    CurrentAccont.setText(listener.getName()+ " Obecny stan konta: 0");
+                    OverallAccount1.setText(listener.getOppenentName()+" Ogólny stan konta: 0");
+                    CurrentAccont1.setText(listener.getOppenentName()+" Obecny stan konta: 0");
+        });
+    }
+
+    void updateCurrentAcount(Message x){
+        Platform.runLater(() -> {
+            int account = x.getCurrentAccount();
+            if(x.getName().equals(listener.getOppenentName())) {
+                if (account == 0) {
+                    CurrentAccont1.setText(listener.getOppenentName() + " Obecny stan konta: 0");
+                }
+                else
+                    CurrentAccont1.setText(listener.getOppenentName() + " Obecny stan konta: "+account);
+            }
+            else if(x.getName().equals(listener.getName())){
+                if(account==0)
+                    CurrentAccont.setText(listener.getName() + " Obecny stan konta: 0");
+                else
+                    CurrentAccont.setText(listener.getName() + " Obecny stan konta: "+account);
             }
         });
     }
 
-    public void sequencing(boolean turn)
+    void setInfo(String info){
+        Platform.runLater(() -> {
+            Text x = new Text(info);
+            Info.getChildren().add(x);
+        });
+    }
+
+    void sequencing(boolean turn)
     {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if(!turn) {
-                    Text info = new Text("Nie twoja tura");
-                    Cash.getChildren().add(info);
-                    setButtonStart(true);  //jesli nie jest twoja runda wysylasz true zeby wylaczyc przycisk
-                }
-                else {
-                    Text info = new Text("Twoja tura");
-                    Cash.getChildren().add(info);
-                    setButtonStart(false);//jesli jest twoja runda
-                }
+        Platform.runLater(() -> {
+            if(!turn) {
+                Text info = new Text("Nie twoja tura");
+                Info.getChildren().clear();
+                Info.getChildren().add(info);
+                setButtonStart(true);  //jesli nie jest twoja runda wysylasz true zeby wylaczyc przycisk
+                setButtonPassword(true);
+            }
+            else {
+                Text info = new Text("Twoja tura");
+                Info.getChildren().clear();
+                Info.getChildren().add(info);
+                setButtonStart(false);//jesli jest twoja runda
+                setButtonPassword(false);
             }
         });
     }
 
-    public void setCash(String cash){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if(cash.equals("BANKRUT"))
-                    listener.setWin(0);
-                else {
-                    listener.setWin(Integer.parseInt(cash));
-                    setButtonStart(true);
-                    setKeyBoard(true);
-                }
-                Text textCash = new Text("Wylosowano: "+cash);
-                Cash.getChildren().clear();
-                Cash.getChildren().add(textCash);
+    synchronized void winnerBanner(){
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Wygrales!");
+            alert.setHeaderText(null);
+            alert.setContentText("Gratulacje wygrales: "+listener.getAccount()+"!");
+            alert.showAndWait();
 
+            Message account = new Message();
+            account.setName(listener.getName());
+            account.setType(MessageType.ACCOUNT);
+            account.setMsg(Integer.toString(listener.getAccount()));
+            Message reset = new Message();
+            reset.setName(listener.getName());
+            reset.setType(MessageType.RESET);
+            reset.setMsg("RESET");
+            try {
+                listener.sendMessage(account);
+                listener.sendMessage(reset);
+                enableButtons();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            resetClient();
+        });
+
+    }
+    synchronized void loseBanner(){
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Bledne haslo!");
+            alert.setHeaderText(null);
+            alert.setContentText("Haslo jest inne!");
+            alert.showAndWait();
+        });
+
+    }
+
+    synchronized void endBanner(){
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Przegrales!");
+            alert.setHeaderText(null);
+            alert.setContentText("Przegrales!");
+            alert.showAndWait();
+
+        });
+        resetClient();
+        enableButtons();
+
+    }
+
+    void setCash(String cash){
+        Message newCurrent = new Message();
+        newCurrent.setType(MessageType.CURRENTACCOUNT);
+        newCurrent.setName(listener.getName());
+        Platform.runLater(() -> {
+            Text textCash;
+            if(cash.equals("BANKRUT")) {
+                listener.setSum(0);
+                listener.setAccount(-1);
+                textCash = new Text("Wylosowano: BANKRUT!"+" Konto: "+listener.getAccount());
+            }
+            else {
+                textCash = new Text("Wylosowano: " + listener.getWin() + " Wygrana: " + listener.getSum() + " Konto: " + listener.getAccount());
+            }
+            Cash.getChildren().clear();
+            Cash.getChildren().add(textCash);
+            CurrentAccont.setText(listener.getName()+" Obecny stan konta: "+listener.getAccount());
+        });
+
+        newCurrent.setCurrentAccount(listener.getAccount());
+        try {
+            listener.sendMessage(newCurrent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void resetClient(){
+        listener.words.clear();
+        listener.labels.clear();
+        listener.setWordsCounter(0);
+        listener.setWordLength(0);
+        listener.setHiddenWord(new StringBuilder(""));
+        listener.setAccount(-1);
+        Platform.runLater(() ->{
+            CurrentAccont.setText(listener.getName()+" Obecny stan konta: 0");
+            CurrentAccont1.setText(listener.getOppenentName()+" Obecny stan konta: 0");
         });
     }
 
-    public void setButtonStart(boolean x)
+    void enableButtons(){
+       for(Node child:keyboard.getChildren()){
+           if(child.isDisable())
+               child.setDisable(false);
+       }
+    }
+
+    void disableButton(String sign){
+        for(Node child:keyboard.getChildren()){
+            if(child.getId().equals(sign.toLowerCase())) {
+                child.setDisable(true);
+            }
+        }
+    }
+
+    void setButtonStart(boolean x)
     {
-        Buttonstart.setDisable(x);
-        Buttonstart.setText("LOSUJ");
+        Platform.runLater(() -> {
+                Buttonstart.setDisable(x);
+                Buttonstart.setText("LOSUJ");
+                });
     }
 
-    public void setKeyBoard(boolean x){
-
-                keyboard.setVisible(x);
+    void setButtonPassword(boolean x)
+    {
+        Platform.runLater(() -> FindPassword.setDisable(x));
     }
 
-    public void setClickedStart(boolean clickedStart) { this.clickedStart = clickedStart;}
+    void setKeyBoard(boolean x){
+            Platform.runLater(() -> keyboard.setVisible(x));
+    }
+
+    void setClickedStart(boolean clickedStart) { this.clickedStart = clickedStart;}
 
 }

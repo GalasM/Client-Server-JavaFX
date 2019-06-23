@@ -13,11 +13,13 @@ public class Server implements Runnable{
 
     private static final int PORT = 2004;
     private ServerSocket socket;
-    private static String[][] hasla = {{"Lew czarownika i stara szafa","Literatura"},{"Ala ma", "Powiedzenia"}, {"Krol Karol kupil krolowej Karolinie korale koloru koralowego", "aaa"}, {"Stol z powylamywanymi nogami", "bbb"}};
+    private static String[] vowel={"a","e","i","y","o","ą","ę","u","ó"};
+    private static String[] consonants={"b","c", "ć", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "z", "ż", "ź"};
+    private static String[][] hasla = {{"Lew czarownica i stara szafa","Literatura"},{"Ala ma", "Powiedzenia"}, {"Krol Karol kupil krolowej Karolinie korale koloru koralowego", "aaa"}, {"Stol z powylamywanymi nogami", "bbb"}};
     private static final int haslaCount=4;
-    private static String[] kwoty ={"500","1000","1500","2000","BANKRUT"};
-    private static final int kwotyCount=5;
-    private static final int generatedNumber = randomValue();
+    private static String[] kwoty ={"250","100","100","250","500","500","1000","1000","1500","2000","BANKRUT"};
+    private static final int kwotyCount=11;
+    private static int generatedNumber = randomValue();
     private static String password;
     private static StringBuilder passwordCompleted = new StringBuilder();
     private static String category;
@@ -29,9 +31,13 @@ public class Server implements Runnable{
     private ArrayList<Socket> clients;
     private ArrayList<Thread> clientThreads;
     private static ArrayList<Handler> players;
+    private ArrayList<Integer> usedWords;
+    private static int round = 1;
+    private static int account1;
+    private static int account2;
 
     //CONSTRUCTOR
-    public Server() throws IOException {
+    private Server() throws IOException {
         players = new ArrayList<>();
         clients = new ArrayList<>();
         socket = new ServerSocket(PORT);
@@ -65,19 +71,19 @@ public class Server implements Runnable{
     }
 
 
-    public void writeToAllSockets(Message input) {
+    private void writeToAllSockets(Message input) {
         for (Handler clientThread : players) {
             clientThread.sendMessage(input);
         }
     }
 
-    public void showAllSockets() {
+    private void showAllSockets() {
         for (Handler clientThread : players) {
           System.out.println(clientThread+" ilosc graczy:"+playersCount);
         }
     }
 
-    public void disconnectClient(Handler client)
+    private void disconnectClient(Handler client)
     {
         System.out.println(client.getThread());
         clients.remove(client.getSocket());
@@ -97,21 +103,25 @@ public class Server implements Runnable{
        return  kwoty[rand.nextInt(kwotyCount)];
     }
 
-   static String randomWord()
+   static private String randomWord()
     {
         return hasla[generatedNumber][0].toUpperCase();
     }
 
-   static String  randomCategory()
+   static private String  randomCategory()
     {
         return hasla[generatedNumber][1].toUpperCase();
     }
 
-    static void setHiddenWord(int i, char ClickedSign) {
+   static private void setHiddenWord(int i, char ClickedSign) {
         passwordCompleted.setCharAt(i, ClickedSign);
     }
 
-   static int checkSign(String sign) {
+    public static void setGeneratedNumber(int generatedNumber) {
+        Server.generatedNumber = generatedNumber;
+    }
+
+    static private int checkSign(String sign) {
         int countSigns=0;
         for (int i = 0; i < length; i++) {
             char ClickedSign;
@@ -135,11 +145,29 @@ public class Server implements Runnable{
                 passwordCompleted.setCharAt(i, '#');
     }
 
-    public void setActiveServer(boolean activeServer) {
+    private static void completePassword(){
+        for (int i = 0; i < length; i++){
+            if (password.charAt(i) == ' ')
+                passwordCompleted.setCharAt(i, '_');
+            else
+                passwordCompleted.setCharAt(i, password.charAt(i));
+        }
+    }
+
+    private static boolean isComplete(){
+        for (int i = 0; i < length; i++){
+            char currChar = passwordCompleted.charAt(i);
+            if(passwordCompleted.charAt(i)== '#')
+                return false;
+        }
+        return true;
+    }
+
+    private void setActiveServer(boolean activeServer) {
         this.activeServer = activeServer;
     }
 
-    public void setTurns(){
+    private void setTurns(){
         boolean randTurn=true;
         Message msg = new Message();
         msg.setType(MessageType.TURN);
@@ -157,6 +185,21 @@ public class Server implements Runnable{
                 clientThread.sendMessage(msg);
             }
         }
+    }
+
+    private void restartSerwer(){
+
+
+        if(generatedNumber==(haslaCount-1)) {
+            generatedNumber = 0;
+        }
+        else
+            generatedNumber++;
+        started=false;
+        startedPlayers=0;
+        round++;
+        System.out.println("RUNDA "+round+"!");
+        System.out.println("account1: "+account1+" account2: "+account2);
     }
 
     ///////MAIN///////////
@@ -223,6 +266,11 @@ public class Server implements Runnable{
                                     sendMessage(info);
                                 }
                                 else {
+                                   /* Message Player = new Message();
+                                    Player.setMsg(inputmsg.getName());
+                                    Player.setType(MessageType.PLAYER);
+                                    Player.setCountSign(0);
+                                    writeToAllSockets(Player);*/
                                     startedPlayers++;
                                     Message StartWord = new Message();
                                     Message StartCategory = new Message();
@@ -256,6 +304,16 @@ public class Server implements Runnable{
                                     break;
 
                             case SIGN:
+                                Message button = new Message();
+                                button.setType(MessageType.BUTTON);
+                                button.setName("Serwer");
+                                for (Handler x:players) {
+
+                                    if (!x.equals(currentPlayer())) {
+                                        button.setMsg(inputmsg.getMsg().toLowerCase());
+                                        x.sendMessage(button);
+                                    }
+                                }
                                     Message Pass = new Message();
                                     Message counter = new Message();
                                     int count = checkSign(inputmsg.getMsg());
@@ -263,6 +321,20 @@ public class Server implements Runnable{
                                     counter.setType(MessageType.SIGN);
                                     counter.setName("Serwer");
                                     String msg = new String(passwordCompleted);
+                                    if(baseServer.isComplete()){
+                                        Message win = new Message();
+                                        win.setType(MessageType.WIN);
+                                        win.setName("Serwer");
+                                        for (Handler x:players) {
+
+                                            if (!x.equals(currentPlayer())) {
+                                                win.setMsg("end");
+                                                x.sendMessage(win);
+                                            }
+                                        }
+                                        win.setMsg("win");
+                                        sendMessage(win);
+                                        }
                                     Pass.setMsg(msg);
                                     Pass.setType(MessageType.INCOMPLETEPASSWORD);
                                     Pass.setName("Serwer");
@@ -274,7 +346,12 @@ public class Server implements Runnable{
                                     Message rand = new Message();
                                     rand.setType(MessageType.RANDOM);
                                     rand.setMsg(randomCash());
-                                    rand.setTurn(true);
+                                    if(rand.getMsg().equals("BANKRUT")) {
+                                        rand.setCurrentAccount(0);
+                                        rand.setCountSign(0);
+                                    }
+                                    else
+                                        rand.setCountSign(Integer.parseInt(rand.getMsg()));
                                     rand.setName("Serwer");
                                     sendMessage(rand);
                                     break;
@@ -293,6 +370,108 @@ public class Server implements Runnable{
                             case NOTIFICATION:
                                 System.out.println(inputmsg.getMsg());
                                 break;
+
+                            case TURN:
+                                Message turn = new Message();
+                                turn.setType(MessageType.TURN);
+                                if(playersCount==1)
+                                {
+                                    turn.setTurn(true);
+                                    sendMessage(turn);
+                                }
+                                else {
+                                if(playersCount>1)
+                                for (Handler x:players) {
+
+                                        if (x.equals(currentPlayer())) {
+                                            turn.setTurn(false);
+                                            x.sendMessage(turn);
+                                        } else {
+                                            turn.setTurn(true);
+                                            x.sendMessage(turn);
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case FIND:
+                                Message win = new Message();
+                                win.setType(MessageType.WIN);
+                                win.setName("Serwer");
+                                if(inputmsg.getMsg().equals(password)){
+                                    for (Handler x:players) {
+
+                                        if (!x.equals(currentPlayer())) {
+                                            win.setMsg("end");
+                                            x.sendMessage(win);
+                                        }
+                                    }
+                                    completePassword();
+                                    Message completedPassword = new Message();
+                                    String completed = new String(passwordCompleted);
+                                    completedPassword.setMsg(completed);
+                                    completedPassword.setName("Serwer");
+                                    completedPassword.setType(MessageType.INCOMPLETEPASSWORD);
+                                    baseServer.writeToAllSockets(completedPassword);
+                                    win.setMsg("win");
+                                }
+                                else {
+                                    win.setMsg("lose");
+                                    win.setTurn(false);
+                                }
+                                sendMessage(win);
+                                break;
+
+                            case ACCOUNT:
+                                if(currentPlayer() == players.get(0)) {
+                                    account1 += Integer.parseInt(inputmsg.getMsg());
+                                    Message account = new Message();
+                                    account.setType(MessageType.ACCOUNT);
+                                    account.setCountSign(account1);
+                                    account.setName(inputmsg.getName());
+                                    account.setMsg("ACCOUNT1");
+                                    writeToAllSockets(account);
+                                }
+                                else {
+                                    account2 += Integer.parseInt(inputmsg.getMsg());
+                                    Message account1 = new Message();
+                                    account1.setType(MessageType.ACCOUNT);
+                                    account1.setCountSign(account2);
+                                    account1.setName(inputmsg.getName());
+                                    account1.setMsg("ACCOUNT2");
+                                    writeToAllSockets(account1);
+                                }
+                                break;
+
+
+                            case CURRENTACCOUNT:
+                                writeToAllSockets(inputmsg);
+                                break;
+                            case RESET:
+                                    restartSerwer();
+                                Message newGame = new Message();
+                                newGame.setName("SERWER");
+                                newGame.setType(MessageType.RESET);
+                                newGame.setMsg("RESET");
+                                    writeToAllSockets(newGame);
+
+                                break;
+
+                            case PLAYER:
+                                Message name = new Message();
+                                name.setMsg(inputmsg.getName());
+                                name.setType(MessageType.PLAYER);
+                                name.setName("SERWER");
+                                int i=0;
+                                    for (Handler x:players) {
+                                        if(x.equals(currentPlayer()))
+                                            name.setCountSign(i);
+                                        else if (!x.equals(currentPlayer())) {
+                                            x.sendMessage(name);
+                                        }
+                                        i++;
+                                    }
+                                break;
                         }
                     }
 
@@ -304,9 +483,6 @@ public class Server implements Runnable{
             }  catch (IOException e) {
               //  closeConnection();
                 System.out.println("Blad przy odczytaniu wiadomosci przez serwer."+Thread.currentThread());
-            } finally {
-
-              //  closeConnection();
             }
 
         }
@@ -320,7 +496,7 @@ public class Server implements Runnable{
             return msg;
         }
 
-        public void sendMessage(Message msg) {
+        synchronized void sendMessage(Message msg) {
             try{
                 out.writeObject(msg);
                 out.flush();
@@ -342,17 +518,21 @@ public class Server implements Runnable{
             }
         }
 
-        public Socket getSocket(){
+        Socket getSocket(){
             return this.socket;
         }
 
-        public Thread getThread(){
+        Thread getThread(){
             return Thread.currentThread();
         }
 
-        public void setYourTurn(boolean yourTurn) { this.yourTurn = yourTurn; }
+        void setYourTurn(boolean yourTurn) { this.yourTurn = yourTurn; }
 
         public boolean getYourTurn(){ return yourTurn;}
+
+        Handler currentPlayer(){
+            return this;
+        }
     }
 }
 

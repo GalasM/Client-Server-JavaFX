@@ -4,11 +4,12 @@ package sample.messages;
 import java.io.Serializable;
 
 public class Message implements Serializable {
-    MessageType type;
-    String msg;
-    int countSign;
-    String name;
-    boolean Turn;
+    private MessageType type;
+    private String msg;
+    private int countSign;
+    private String name;
+    private boolean Turn;
+    private int CurrentAccount;
 
 
     public void setMsg(String msg) {
@@ -42,4 +43,8 @@ public class Message implements Serializable {
     public void setTurn(boolean turn) { Turn = turn; }
 
     public boolean isTurn() { return Turn; }
+
+    public int getCurrentAccount() { return CurrentAccount; }
+
+    public void setCurrentAccount(int currentAccount) { CurrentAccount = currentAccount; }
 }

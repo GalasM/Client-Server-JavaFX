@@ -6,11 +6,22 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="pan" prefHeight="800.0" prefWidth="1200.0" xmlns:fx="http://javafx.com/fxml/1" style="-fx-background-color: #ffef76;" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="sample.client.Controller">
-    <FlowPane fx:id="Kategorie" minWidth = "700" layoutX = "450" layoutY = "10" hgap = "50" vgap = "7" ></FlowPane>
-    <FlowPane fx:id="Gpane" hgap="50" layoutX="450" layoutY="70" minWidth="700" vgap="7" />
-    <GridPane fx:id="keyboard" layoutX="14.0" layoutY="402.0" maxWidth="707.0" prefHeight="183.0" prefWidth="386.0" visible="false">
+<?import javafx.scene.text.Text?>
+<AnchorPane fx:id="pan" prefHeight="800.0" prefWidth="1400.0" style="-fx-background-color: #ffef76;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.client.Controller">
+    <FlowPane fx:id="Info" hgap="50" layoutX="50" layoutY="10" minWidth="700" vgap="7" />
+    <FlowPane fx:id="Kategorie" hgap="50" layoutX="450" layoutY="10" minWidth="700" vgap="7" />
+    <FlowPane fx:id="Gpane" hgap="50" layoutX="450" layoutY="70" minWidth="700" vgap="7" maxWidth="750" />
+    <VBox fx:id="playersPanel" layoutX="50" layoutY="125" minWidth="345" minHeight="250" spacing="10" style="-fx-background-color: #ffff;" >
+        <children>
+            <Text fx:id="OverallAccount" style="-fx-font-size: 20"/>
+            <Text fx:id="CurrentAccont" style="-fx-font-size: 20"/>
+            <Text fx:id="OverallAccount1" style="-fx-font-size: 20"/>
+            <Text fx:id="CurrentAccont1" style="-fx-font-size: 20"/>
+        </children>
+    </VBox>
+    <GridPane fx:id="keyboard" layoutX="15.0" layoutY="400.0" maxWidth="700.0" prefHeight="183.0" prefWidth="385.0" visible="false">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="10.0" />
@@ -27,40 +38,41 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
-        <Button fx:id="z" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Z" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="h" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="H" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="g" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="G" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="f" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="F" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="ą" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ą" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="b" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="B" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="c" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="C" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="ć" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ć" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="j" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="J" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="i" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="I" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="m" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="M" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="n" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="N" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="ń" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ń" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="o" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="O" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="ó" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ó" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="s" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="S" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="ś" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ś" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="t" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="T" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="u" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="U" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="w" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="W" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="d" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="D" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="e" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="E" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="k" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="K" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="l" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="L" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="p" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="P" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="ż" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ż" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="y" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Y" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-        <Button fx:id="ę" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ę" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="ł" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ł" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <Button fx:id="r" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="R" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-        <Button fx:id="a" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="A" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-        <Button fx:id="ź" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ź" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="z" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Z" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="h" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="H" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="g" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="G" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="f" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="F" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="ą" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ą" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="b" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="B" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="c" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="C" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="ć" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ć" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="j" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="J" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="i" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="I" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="m" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="M" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="n" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="N" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="ń" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ń" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="o" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="O" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="ó" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ó" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="s" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="S" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="ś" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ś" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="t" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="T" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="u" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="U" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="w" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="W" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="d" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="D" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="e" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="E" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="k" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="K" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="l" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="L" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="p" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="P" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="ż" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ż" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="y" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Y" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+        <Button id="ę" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ę" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="ł" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ł" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <Button id="r" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="R" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+        <Button id="a" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="A" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+        <Button id="ź" focusTraversable="false" mnemonicParsing="false" onAction="#clickSign" pickOnBounds="false" prefHeight="30.0" prefWidth="30.0" text="Ź" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
     </GridPane>
     <Button fx:id="Buttonstart" layoutX="50" layoutY="50" mnemonicParsing="false" onAction="#starting" prefHeight="30.0" prefWidth="100.0" text="START" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+    <Button fx:id="FindPassword" layoutX="200" layoutY="50" minWidth="150" mnemonicParsing="false" onAction="#find" prefHeight="30.0" prefWidth="100.0" text="ZGADNIJ HASLO" visible="false" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
     <Button fx:id="Buttonwyjscie" layoutX="50" layoutY="700" mnemonicParsing="false" onAction="#exit" prefHeight="30.0" prefWidth="100.0" text="WYJSCIE" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-    <FlowPane fx:id="Cash" layoutY="650" layoutX="650"></FlowPane>
+    <FlowPane fx:id="Cash" layoutX="650" layoutY="650" />
 </AnchorPane>
